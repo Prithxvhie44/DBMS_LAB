@@ -1,0 +1,16 @@
+1]
+SET SERVEROUTPUT ON;
+DECLARE
+v_num NUMBER := &input_number;
+v_factorial NUMBER := 1;
+begin
+IF v_num < 0 THEN
+DBMS_OUTPUT.PUT_LINE('Factorial is not defined for negative numbers.');
+ELSE
+FOR i IN 1..v_num LOOP
+v_factorial := v_factorial * i;
+END LOOP;
+DBMS_OUTPUT.PUT_LINE('Factorial of ' || v_num || ' is: ' || v_factorial);
+END IF;
+END;
+/
