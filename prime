@@ -1,0 +1,29 @@
+SET SERVEROUTPUT ON;
+create function primecheck(num in NUMBER)
+return number
+is
+cnt number:=0;
+begin
+for i in 1..num loop
+if(num mod i=0) then
+cnt:=cnt+1;
+end if;
+end loop;
+return cnt;
+end;
+/
+DECLARE
+v_num NUMBER := &input_number;
+v_count number;
+begin
+v_count:=primecheck(v_num);
+if v_num=1 then
+dbms_output.put_line(v_num || ' is neither prime nor composite.');
+
+elsif v_count=2 then
+dbms_output.put_line(v_num||' is a prime number.');
+else
+dbms_output.put_line(v_num||' is a composite number.');
+end if;
+END;
+/
