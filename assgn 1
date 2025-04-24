@@ -1,0 +1,154 @@
+INSERT INTO department (department_id, department_name) VALUES
+(1, 'Human Resources'),
+(2, 'Engineering'),
+(3, 'Finance'),
+(4, 'Marketing'),
+(5, 'Sales'),
+(6, 'IT Support'),
+(7, 'Research and Development'),
+(8, 'Customer Service'),
+(9, 'Logistics'),
+(10, 'Legal');
+
+INSERT INTO Employees (EmployeeID, EmployeeName, Age, Salary, DepartmentID) VALUES
+(101, 'Prithviraj', 29, 55000.00, 2),
+(102, 'Yash', 35, 65000.00, 3),
+(103, 'Harsh', 42, 70000.00, 1),
+(104, 'Aditya', 28, 52000.00, 4),
+(105, 'Tejas', 30, 60000.00, 5),
+(106, 'Shreyas', 45, 75000.00, 2),
+(107, 'Shruti', 26, 48000.00, 6),
+(108, 'Jaggi', 39, 68000.00, 7),
+(109, 'Ananaya', 32, 59000.00, 8),
+(110, 'Kosada', 41, 72000.00, 3);
+
+INSERT INTO Projects (ProjectID, ProjectName, EmployeeID) VALUES
+(201, 'Recruitment Overhaul', 103),
+(202, 'New Website', 101),
+(203, 'Financial Audit Q1', 102),
+(204, 'Ad Campaign 2025', 104),
+(205, 'Sales Booster', 105),
+(206, 'Internal Tool Development', 106),
+(207, 'Help Desk System', 107),
+(208, 'Product Innovation', 108),
+(209, 'Customer Feedback Analysis', 109),
+(210, 'Regulatory Compliance', 110);
+show tables;
+
+
+select * from Employees
+where Age>30;
+
+select d.department_name,d.department_id,count(e.EmployeeId) as count
+from department d
+join Employees e on d.department_id=e.DepartmentID
+group by d.department_id, d.department_name
+having count(e.EmployeeId)>5;
+
+
+select d.department_name,e.EmployeeName
+from department d
+join Employees e on d.department_id=e.DepartmentID;
+
+
+select d.department_name,d.department_id,max(salary)
+from department d
+join Employees e on d.department_id = e.DepartmentID
+group by d.department_id,d.department_name;
+
+
+select avg(salary) from Employees;
+
+
+
+SELECT * FROM Employees
+ORDER BY Salary DESC;
+
+
+
+SELECT d.DepartmentID, d.DepartmentName, SUM(e.Salary) AS TotalSalary
+FROM Departments d
+JOIN Employees e ON d.DepartmentID = e.DepartmentID
+GROUP BY d.DepartmentID, d.DepartmentName;
+
+
+SELECT e.*
+FROM Employees e
+JOIN (
+    SELECT DepartmentID, MIN(Age) AS MinAge
+    FROM Employees
+    GROUP BY DepartmentID
+) young ON e.DepartmentID = young.DepartmentID AND e.Age = young.MinAge;
+
+
+SELECT * FROM Employees
+WHERE EmployeeName LIKE 'A%';
+
+
+SELECT e.EmployeeID, e.EmployeeName, p.ProjectName
+FROM Employees e
+LEFT JOIN Projects p ON e.EmployeeID = p.EmployeeID;
+
+
+SELECT d.DepartmentName, COUNT(e.EmployeeID) AS EmployeeCount
+FROM Departments d
+JOIN Employees e ON d.DepartmentID = e.DepartmentID
+GROUP BY d.DepartmentName;
+
+
+SELECT TOP 1 d.DepartmentName, AVG(e.Salary) AS AvgSalary
+FROM Departments d
+JOIN Employees e ON d.DepartmentID = e.DepartmentID
+GROUP BY d.DepartmentName
+ORDER BY AvgSalary DESC;
+
+
+SELECT e.*
+FROM Employees e
+LEFT JOIN Projects p ON e.EmployeeID = p.EmployeeID
+WHERE p.ProjectID IS NULL;
+
+
+SELECT * FROM Employees
+WHERE Age BETWEEN 25 AND 40;
+
+
+SELECT ProjectName, COUNT(EmployeeID) AS EmployeeCount
+FROM Projects
+GROUP BY ProjectName
+HAVING COUNT(EmployeeID) > 3;
+
+
+SELECT *
+FROM Employees
+ORDER BY LENGTH(EmployeeName) DESC
+LIMIT 1;
+
+
+SELECT d.DepartmentName, COUNT(p.ProjectID) AS ProjectCount
+FROM Departments d
+JOIN Employees e ON d.DepartmentID = e.DepartmentID
+JOIN Projects p ON e.EmployeeID = p.EmployeeID
+GROUP BY d.DepartmentName;
+
+
+SELECT e.*
+FROM Employees e
+JOIN (
+    SELECT DepartmentID, AVG(Salary) AS AvgDeptSalary
+    FROM Employees
+    GROUP BY DepartmentID
+) avgSalaries ON e.DepartmentID = avgSalaries.DepartmentID
+WHERE e.Salary < avgSalaries.AvgDeptSalary;
+
+
+SELECT d.DepartmentName, COUNT(e.EmployeeID) AS EmployeeCount
+FROM Departments d
+JOIN Employees e ON d.DepartmentID = e.DepartmentID
+GROUP BY d.DepartmentName
+ORDER BY EmployeeCount DESC
+LIMIT 1;
+
+
+
+	
