@@ -1,0 +1,56 @@
+
+CREATE TABLE acct_details (
+    acc_no NUMBER PRIMARY KEY,
+    branch_name VARCHAR2(50),
+    status VARCHAR2(10) -- 'Active' or 'Inactive'
+);
+
+CREATE TABLE active_acc_details (
+    acc_no NUMBER,
+    branch_name VARCHAR2(50),
+    status VARCHAR2(10)
+);
+
+
+INSERT INTO acct_details VALUES (101, 'Pune', 'Active');
+INSERT INTO acct_details VALUES (102, 'Mumbai', 'Inactive');
+INSERT INTO acct_details VALUES (103, 'Nagpur', 'Active');
+
+
+CREATE OR REPLACE FUNCTION check_account_status (
+    p_acc_no acct_details.acc_no%TYPE,
+    p_branch acct_details.branch_name%TYPE
+) RETURN VARCHAR2 IS
+    v_status acct_details.status%TYPE;
+BEGIN
+    SELECT status INTO v_status
+    FROM acct_details
+    WHERE acc_no = p_acc_no AND branch_name = p_branch;
+
+    IF v_status = 'Active' THEN
+        INSERT INTO active_acc_details (acc_no, branch_name, status)
+        VALUES (p_acc_no, p_branch, v_status);
+
+        RETURN 'Account is Active';
+    ELSE
+        RETURN 'Account is Inactive';
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'Account not found';
+END;
+/
+
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_acc_no acct_details.acc_no%TYPE := &acc_no;
+    v_branch acct_details.branch_name%TYPE := '&branch_name';
+    v_result VARCHAR2(100);
+BEGIN
+    v_result := check_account_status(v_acc_no, v_branch);
+    DBMS_OUTPUT.PUT_LINE(v_result);
+END;
+/
