@@ -1,0 +1,50 @@
+-- Create departments table
+CREATE TABLE departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR2(50)
+);
+
+-- Create employees table
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR2(50),
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
+);
+
+-- Insert departments
+INSERT INTO departments VALUES (10, 'HR');
+INSERT INTO departments VALUES (20, 'Finance');
+INSERT INTO departments VALUES (30, 'Engineering');
+
+-- Insert employees
+INSERT INTO employees VALUES (1, 'Alice', 10);
+INSERT INTO employees VALUES (2, 'Bob', 20);
+INSERT INTO employees VALUES (3, 'Charlie', 30);
+INSERT INTO employees VALUES (4, 'David', 30);
+INSERT INTO employees VALUES (5, 'Eva', 20);
+
+COMMIT;
+SET SERVEROUTPUT ON;
+
+DECLARE
+    -- Cursor to get department name and employee count
+    CURSOR dept_cursor IS
+        SELECT d.dept_name, COUNT(e.emp_id) AS emp_count
+        FROM departments d
+        LEFT JOIN employees e ON d.dept_id = e.dept_id
+        GROUP BY d.dept_name;
+
+    -- Variables to hold cursor values
+    v_dept_name departments.dept_name%TYPE;
+    v_emp_count NUMBER;
+BEGIN
+    OPEN dept_cursor;
+    LOOP
+        FETCH dept_cursor INTO v_dept_name, v_emp_count;
+        EXIT WHEN dept_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Department: ' || v_dept_name || ' | Employees: ' || v_emp_count);
+    END LOOP;
+    CLOSE dept_cursor;
+END;
+/
