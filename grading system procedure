@@ -1,0 +1,32 @@
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR2(50),
+    marks NUMBER(5,2),
+    grade CHAR(1)
+);
+
+INSERT INTO students (student_id, name, marks) VALUES (1, 'Alice', 92);
+INSERT INTO students (student_id, name, marks) VALUES (2, 'Bob', 78);
+INSERT INTO students (student_id, name, marks) VALUES (3, 'Charlie', 66);
+INSERT INTO students (student_id, name, marks) VALUES (4, 'David', 55);
+
+CREATE OR REPLACE PROCEDURE calculate_grades IS
+BEGIN
+    FOR stu IN (SELECT student_id, marks FROM students) LOOP
+        UPDATE students
+        SET grade = CASE
+            WHEN stu.marks >= 90 THEN 'A'
+            WHEN stu.marks >= 75 THEN 'B'
+            WHEN stu.marks >= 60 THEN 'C'
+            ELSE 'D'
+        END
+        WHERE student_id = stu.student_id;
+    END LOOP;
+END;
+/
+
+
+BEGIN
+    calculate_grades;
+END;
+/
