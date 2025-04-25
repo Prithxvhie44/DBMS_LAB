@@ -1,0 +1,43 @@
+CREATE TABLE EMP (
+  E_no NUMBER PRIMARY KEY,
+  Salary NUMBER(10, 2)
+);
+
+CREATE TABLE increment_salary (
+  E_no NUMBER PRIMARY KEY,
+  Salary NUMBER(10, 2)
+);
+
+INSERT INTO EMP VALUES (101, 50000);
+INSERT INTO EMP VALUES (102, 40000);
+INSERT INTO EMP VALUES (103, 60000);
+INSERT INTO EMP VALUES (104, 35000);
+INSERT INTO EMP VALUES (105, 70000);
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+  CURSOR cur_salary IS
+    SELECT E_no, Salary FROM EMP
+    WHERE Salary < (SELECT AVG(Salary) FROM EMP);
+
+  v_E_no EMP.E_no%TYPE;
+  v_Salary EMP.Salary%TYPE;
+  v_new_salary EMP.Salary%TYPE;
+
+BEGIN
+  OPEN cur_salary;
+  LOOP
+    FETCH cur_salary INTO v_E_no, v_Salary;
+    EXIT WHEN cur_salary%NOTFOUND;
+
+    v_new_salary := v_Salary * 1.10; -- Increase by 10%
+
+    UPDATE EMP SET Salary = v_new_salary WHERE E_no = v_E_no;
+    INSERT INTO increment_salary VALUES (v_E_no, v_new_salary);
+  END LOOP;
+  CLOSE cur_salary;
+
+  DBMS_OUTPUT.PUT_LINE('Salaries updated and recorded successfully.');
+END;
+/
