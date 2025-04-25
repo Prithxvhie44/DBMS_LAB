@@ -1,0 +1,85 @@
+CREATE TABLE N_RollCall (
+  roll_no NUMBER PRIMARY KEY,
+  name VARCHAR2(50)
+);
+
+CREATE TABLE O_RollCall (
+  roll_no NUMBER PRIMARY KEY,
+  name VARCHAR2(50)
+);
+
+-- Data for N_RollCall
+INSERT INTO N_RollCall VALUES (101, 'Amit');
+INSERT INTO N_RollCall VALUES (102, 'Bhavna');
+INSERT INTO N_RollCall VALUES (103, 'Chetan');
+
+-- Data for O_RollCall (already has 1 overlapping)
+INSERT INTO O_RollCall VALUES (102, 'Bhavna');
+INSERT INTO O_RollCall VALUES (104, 'Divya');
+
+
+DECLARE
+  CURSOR check_cursor(p_rollno NUMBER) IS
+    SELECT roll_no FROM O_RollCall WHERE roll_no = p_rollno;
+
+  v_temp NUMBER;
+BEGIN
+  FOR new_row IN (SELECT * FROM N_RollCall) LOOP
+    OPEN check_cursor(new_row.roll_no);
+    FETCH check_cursor INTO v_temp;
+    
+    IF check_cursor%NOTFOUND THEN
+      INSERT INTO O_RollCall VALUES (new_row.roll_no, new_row.name);
+    END IF;
+
+    CLOSE check_cursor;
+  END LOOP;
+END;
+
+
+
+
+CREATE TABLE EMP (
+  e_no NUMBER PRIMARY KEY,
+  d_no NUMBER,
+  salary NUMBER
+);
+
+CREATE TABLE dept_salary (
+  d_no NUMBER PRIMARY KEY,
+  Avg_salary NUMBER
+);
+
+
+
+-- Employees from different departments
+INSERT INTO EMP VALUES (1, 10, 50000);
+INSERT INTO EMP VALUES (2, 10, 55000);
+INSERT INTO EMP VALUES (3, 20, 60000);
+INSERT INTO EMP VALUES (4, 20, 62000);
+INSERT INTO EMP VALUES (5, 30, 70000);
+
+
+DECLARE
+  CURSOR emp_cursor(p_dno NUMBER) IS
+    SELECT salary FROM EMP WHERE d_no = p_dno;
+
+  v_avg NUMBER;
+BEGIN
+  FOR dept IN (SELECT DISTINCT d_no FROM EMP) LOOP
+    DECLARE
+      v_sum   NUMBER := 0;
+      v_count NUMBER := 0;
+    BEGIN
+      FOR emp_rec IN emp_cursor(dept.d_no) LOOP
+        v_sum := v_sum + emp_rec.salary;
+        v_count := v_count + 1;
+      END LOOP;
+
+      IF v_count > 0 THEN
+        v_avg := v_sum / v_count;
+        INSERT INTO dept_salary VALUES (dept.d_no, v_avg);
+      END IF;
+    END;
+  END LOOP;
+END;
