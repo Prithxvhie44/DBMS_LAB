@@ -1,0 +1,77 @@
+CREATE TABLE Borrower (
+    Rollin NUMBER,
+    Name VARCHAR2(50),
+    DateofIssue DATE,
+    NameofBook VARCHAR2(100),
+    Status CHAR(1) -- 'I' for Issued, 'R' for Returned
+);
+
+CREATE TABLE Fine (
+    Roll_no NUMBER,
+    Date DATE,
+    Amt NUMBER
+);
+
+
+INSERT INTO Borrower VALUES (1, 'Amit', TO_DATE('2024-03-01', 'YYYY-MM-DD'), 'DBMS', 'I');
+INSERT INTO Borrower VALUES (2, 'Riya', TO_DATE('2024-03-15', 'YYYY-MM-DD'), 'Maths', 'I');
+
+CREATE OR REPLACE PROCEDURE process_return (
+    p_roll_no IN NUMBER,
+    p_book_name IN VARCHAR2
+) IS
+    v_days NUMBER;
+    v_fine NUMBER := 0;
+    v_date_of_issue DATE;
+    v_status CHAR(1);
+BEGIN
+    -- Get issue date and status
+    SELECT DateofIssue, Status INTO v_date_of_issue, v_status
+    FROM Borrower
+    WHERE Rollin = p_roll_no AND NameofBook = p_book_name;
+
+    -- Calculate number of days since issue
+    v_days := TRUNC(SYSDATE - v_date_of_issue);
+
+    IF v_status = 'I' THEN
+        -- Calculate fine
+        IF v_days > 30 THEN
+            v_fine := (15 * 5) + ((v_days - 30) * 50);
+        ELSIF v_days > 15 THEN
+            v_fine := (v_days - 15) * 5;
+        END IF;
+
+        -- Update status
+        UPDATE Borrower
+        SET Status = 'R'
+        WHERE Rollin = p_roll_no AND NameofBook = p_book_name;
+
+        -- Insert into Fine table if fine exists
+        IF v_fine > 0 THEN
+            INSERT INTO Fine (Roll_no, Date, Amt)
+            VALUES (p_roll_no, SYSDATE, v_fine);
+        END IF;
+
+        DBMS_OUTPUT.PUT_LINE('Book returned successfully.');
+        IF v_fine > 0 THEN
+            DBMS_OUTPUT.PUT_LINE('Fine Amount: Rs ' || v_fine);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('No fine applied.');
+        END IF;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Book already returned.');
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Borrower or book not found.');
+END;
+/
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+    -- Call with Roll No and Book Name
+    process_return(1, 'DBMS');
+END;
+/
