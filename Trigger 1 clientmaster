@@ -1,0 +1,64 @@
+-- Main Table
+CREATE TABLE clientmstr (
+  client_id NUMBER PRIMARY KEY,
+  client_name VARCHAR2(50),
+  city VARCHAR2(30)
+);
+
+-- Audit Table
+CREATE TABLE audit_trade (
+  audit_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  operation_type VARCHAR2(10),
+  client_id NUMBER,
+  client_name VARCHAR2(50),
+  city VARCHAR2(30),
+  action_date DATE
+);
+
+INSERT INTO clientmstr (client_id, client_name, city) VALUES (1, 'Amit', 'Pune');
+INSERT INTO clientmstr (client_id, client_name, city) VALUES (2, 'Riya', 'Mumbai');
+
+-- Trigger for Update or Delete (Row-Level)
+CREATE OR REPLACE TRIGGER trg_row_audit_client
+BEFORE UPDATE OR DELETE ON clientmstr
+FOR EACH ROW
+BEGIN
+  INSERT INTO audit_trade (operation_type, client_id, client_name, city, action_date)
+  VALUES (
+    CASE
+      WHEN DELETING THEN 'DELETE'
+      WHEN UPDATING THEN 'UPDATE'
+    END,
+    :OLD.client_id,
+    :OLD.client_name,
+    :OLD.city,
+    SYSDATE
+  );
+END;
+/
+
+-- Statement-level Trigger (Just logs the operation, not row details)
+CREATE OR REPLACE TRIGGER trg_stmt_audit_client
+AFTER UPDATE OR DELETE ON clientmstr
+BEGIN
+  INSERT INTO audit_trade (operation_type, client_id, client_name, city, action_date)
+  VALUES (
+    CASE
+      WHEN DELETEING THEN 'DELETE_STMT'
+      WHEN UPDATING THEN 'UPDATE_STMT'
+    END,
+    NULL, NULL, NULL,
+    SYSDATE
+  );
+END;
+/
+
+-- Update a client
+UPDATE clientmstr SET city = 'Delhi' WHERE client_id = 1;
+
+-- Delete a client
+DELETE FROM clientmstr WHERE client_id = 2;
+
+-- Check the audit
+SELECT * FROM audit_trade;
+
