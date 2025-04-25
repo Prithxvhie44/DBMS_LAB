@@ -1,0 +1,40 @@
+CREATE TABLE stud21 (
+  roll NUMBER(4) PRIMARY KEY,
+  att NUMBER(4),
+  status VARCHAR(1)
+);
+
+CREATE TABLE d_stud (
+  roll NUMBER(4) PRIMARY KEY,
+  att NUMBER(4)
+);
+
+INSERT INTO stud21 VALUES (101, 80, NULL);
+INSERT INTO stud21 VALUES (102, 70, NULL);
+INSERT INTO stud21 VALUES (103, 60, NULL);
+INSERT INTO stud21 VALUES (104, 90, NULL);
+INSERT INTO stud21 VALUES (105, 65, NULL);
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+  CURSOR atttendance IS
+    SELECT roll, att FROM stud21 WHERE att < 75;
+
+  v_roll stud21.roll%TYPE;
+  v_att stud21.att%TYPE;
+
+BEGIN
+  OPEN atttendance;
+  LOOP
+    FETCH atttendance INTO v_roll, v_att;
+    EXIT WHEN atttendance%NOTFOUND;
+
+    UPDATE stud21 SET status = 'D' WHERE roll = v_roll;
+    INSERT INTO d_stud(roll, att) VALUES (v_roll, v_att);
+  END LOOP;
+  CLOSE atttendance;
+
+  DBMS_OUTPUT.PUT_LINE('Detained students marked and logged.');
+END;
+/
