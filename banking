@@ -1,0 +1,36 @@
+
+CREATE TABLE Accounts (
+    Acc_No NUMBER PRIMARY KEY,
+    Acc_Holder VARCHAR2(50),
+    Last_Transaction DATE,
+    Status VARCHAR2(10) CHECK (Status IN ('Active', 'Inactive'))
+);
+
+INSERT INTO Accounts VALUES (101, 'Pithvi', TO_DATE('2022-01-10', 'YYYY-MM-DD'), 'Inactive');
+INSERT INTO Accounts VALUES (102, 'Yash', TO_DATE('2023-03-15', 'YYYY-MM-DD'), 'Inactive');
+INSERT INTO Accounts VALUES (103, 'Harsh', TO_DATE('2021-12-05', 'YYYY-MM-DD'), 'Inactive');
+INSERT INTO Accounts VALUES (104, 'Aditya', TO_DATE('2023-07-20', 'YYYY-MM-DD'), 'Active');
+INSERT INTO Accounts VALUES (105, 'Tejas', TO_DATE('2022-05-10', 'YYYY-MM-DD'), 'Inactive');
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_count NUMBER;
+BEGIN
+    UPDATE Accounts
+    SET Status = 'Active'
+    WHERE Status = 'Inactive'
+    AND Last_Transaction <= ADD_MONTHS(SYSDATE, -12);
+
+    v_count := SQL%ROWCOUNT;
+
+    IF SQL%FOUND THEN
+        DBMS_OUTPUT.PUT_LINE(v_count || ' account(s) have been activated.');
+    ELSIF SQL%NOTFOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No inactive accounts found for activation.');
+    END IF;
+END;
+/
+
+
+
